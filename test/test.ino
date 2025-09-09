@@ -64,38 +64,38 @@ void loop() {
   }
 
   // ------------------ PRESIÓN ------------------
-  if (Alivio && (presion < 1.1) && !Inflar) {  
+  if (Alivio && (presion < 1.1) && Inflar) {  
     presion = presion + (objetivo_aliviar - presion) * 0.1;
-    delay(200);
+    delay(2000);
   }
   else if (Alivio && Inflar) {
     if ((1 < presion) && (presion < 1.3)) {
       presion = presion + (1.3 - presion) * 0.1;
-      delay(50);
+      delay(500);
     }
   }
-  else if (Inflar && !Alivio) {
+  else if (Inflar && Alivio) {
     if ((presion > 1.1) && (presion < 1.4)) {
       presion = presion + (objetivo_inflar - presion) * 0.1;
-      delay(200);
+      delay(2000);
     }
   }
-  else if (Alivio && !Descargar) {
+  else if (Alivio && Descargar) {
     if (presion > 1) {
       presion = presion - (presion - objetivo_aliviar) * 0.1;
-      delay(200);
+      delay(2000);
     }
   }
   else if (Alivio && Descargar) {
     if ((1 < presion) && (presion < 1.3)) {
       presion = presion + (1 - presion) * 0.1;
-      delay(50);
+      delay(500);
     }
   }
-  else if (Descargar && !Alivio) {
+  else if (Descargar && Alivio) {
     if ((presion > 0.9) && (presion < 1.3)) {
       presion = presion + (objetivo_descargar - presion) * 0.1;
-      delay(200);
+      delay(2000);
     }
   }
 
@@ -107,21 +107,21 @@ void loop() {
   // ------------------ GIRO DEL TAMBOR ------------------
   if (GiroHorario && cont != 359) {
     cont++;
-    delay(100);
+    delay(10);
   }
   else if (GiroAntihorario && cont != 0) {
     cont--;
-    delay(100);
+    delay(10);
   }
   else if (GiroHorario && cont == 359) {
     cont = 0;
     vueltas++;  // sumo vuelta completa
-    delay(100);
+    delay(10);
   }
   else if (GiroAntihorario && cont == 0) {
     cont = 359;
     vueltas--;  // resto vuelta completa
-    delay(100);
+    delay(10);
   }
 
   // Fines de carrera (sin operador ternario)
@@ -146,4 +146,14 @@ void loop() {
   Serial.print(cont);
   Serial.print(" | vueltas: ");
   Serial.println(vueltas);
+
+  Serial.print(digitalRead(9));
+  Serial.print(" h Ah ");
+  Serial.print(digitalRead(8));
+  delay(100);
+  /*Serial.print(" | giro horario: ");
+  Serial.println(GiroHorario);
+    Serial.print(" | giro antihorario: ");
+  Serial.println(GiroAntihorario);*/
+  Serial.println()
 }
