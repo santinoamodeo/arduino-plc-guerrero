@@ -13,7 +13,7 @@ int ARD_OUT_FC_ESCOTILLA_CERRADA = 2;
 int ARD_OUT_FC_ESCOTILLA_ABIERTA = 3;
 int ARD_OUT_FC_TAMBOR_ARRIBA = 4;
 int ARD_OUT_FC_TAMBOR_ABAJO = 5;
-int PWM_PRESION = 6;  // Salida PWM de presión
+int PWM_PRESION = 6;  // Salida PWM de presión  
 
 //Negar salidas PLC
 int EscotillaValvula = !digitalRead(PLC_OUT_ESCOTILLA_E_VALVULA);
@@ -172,7 +172,6 @@ void loop() {
 
   }
   if ((digitalRead(GiroHorario) == HIGH ) and (cont==359)) {
-
     cont=0;
     delay(100);    
   }
@@ -200,6 +199,10 @@ void loop() {
   Serial.print(pwmValor);
   Serial.print(" | Vueltas tambor: ");
   Serial.println(vueltas);
+  Serial.println(cont);
+  Serial.println("h y AH");
+  Serial.println(GiroHorario);
+  Serial.println(GiroAntihorario);
 
   delay(100);
 }
