@@ -1,17 +1,18 @@
 // Entradas desde el PLC (Arduino las LEE)
-int PLC_OUT_ESCOTILLA_E_VALVULA = 2; 
-int PLC_OUT_INFLAR = 4;
-int PLC_OUT_DESCARGAR = 5;
-int PLC_OUT_VALVULA_ALIVIO = 7;
-int PLC_OUT_GIRO_HOR = 8;
-int PLC_OUT_GIRO_ANTIHOR = 12;
-int PLC_OUT_ESCOTILLA_ABRIR = 14;
-int PLC_OUT_ESCOTILLA_CERRAR = 15;
+int PLC_OUT_ESCOTILLA_E_VALVULA = 13; 
+int PLC_OUT_INFLAR = 12;
+int PLC_OUT_DESCARGAR = 11;
+int PLC_OUT_VALVULA_ALIVIO = 10;
+int PLC_OUT_GIRO_HOR = 9;
+int PLC_OUT_GIRO_ANTIHOR = 8;
+//int PLC_OUT_ESCOTILLA_ABRIR = 14;
+//int PLC_OUT_ESCOTILLA_CERRAR = 15;
 
 // Salidas hacia el PLC (Arduino las ESCRIBE)
-int ARD_OUT_FC_ESCOTILLA_CERRADA = 9;
-int ARD_OUT_FC_ESCOTILLA_ABIERTA = 10;
-int ARD_OUT_FC_TAMBOR = 11;
+int ARD_OUT_FC_ESCOTILLA_CERRADA = 2;
+int ARD_OUT_FC_ESCOTILLA_ABIERTA = 3;
+int ARD_OUT_FC_TAMBOR_ARRIBA = 4;
+int ARD_OUT_FC_TAMBOR_ABAJO = 5;
 int PWM_PRESION = 6;  // Salida PWM de presión
 
 // Variables internas
@@ -22,20 +23,24 @@ float objetivo_inflar = 2.2;
 float objetivo_descargar = -0.15;
 float objetivo_aliviar = 1.2;
 
+int cont=0;
+
 void setup() {
   // Entradas
-  pinMode(PLC_OUT_ESCOTILLA_ABRIR, INPUT);
-  pinMode(PLC_OUT_ESCOTILLA_CERRAR, INPUT);
-  pinMode(PLC_OUT_INFLAR, INPUT);
-  pinMode(PLC_OUT_DESCARGAR, INPUT);
-  pinMode(PLC_OUT_VALVULA_ALIVIO, INPUT);
-  pinMode(PLC_OUT_GIRO_HOR, INPUT);
-  pinMode(PLC_OUT_GIRO_ANTIHOR, INPUT);
+  //pinMode(PLC_OUT_ESCOTILLA_ABRIR, INPUT);
+  //pinMode(PLC_OUT_ESCOTILLA_CERRAR, INPUT);
+  pinMode(PLC_OUT_INFLAR, INPUT_PULLUP);
+  pinMode(PLC_OUT_DESCARGAR, INPUT_PULLUP);
+  pinMode(PLC_OUT_VALVULA_ALIVIO, INPUT_PULLUP);
+  pinMode(PLC_OUT_GIRO_HOR, INPUT_PULLUP);
+  pinMode(PLC_OUT_GIRO_ANTIHOR, INPUT_PULLUP);
+  pinMode(PLC_OUT_ESCOTILLA_E_VALVULA, INPUT_PULLUP);
 
   // Salidas
   pinMode(ARD_OUT_FC_ESCOTILLA_CERRADA, OUTPUT);
   pinMode(ARD_OUT_FC_ESCOTILLA_ABIERTA, OUTPUT);
-  pinMode(ARD_OUT_FC_TAMBOR, OUTPUT);
+  pinMode(ARD_OUT_FC_TAMBOR_ARRIBA, OUTPUT);
+  pinMode(ARD_OUT_FC_TAMBOR_ABAJO, OUTPUT);
   pinMode(PWM_PRESION, OUTPUT);
 
   Serial.begin(9600);
@@ -47,15 +52,15 @@ void loop() {
   //Escotilla abierta
   if(digitalRead(PLC_OUT_ESCOTILLA_E_VALVULA) == HIGH) {
     delay(200);
-    ARD_OUT_FC_ESCOTILLA_ABIERTA = HIGH;
-    ARD_OUT_FC_ESCOTILLA_CERRADA = LOW;
+    digitalWrite(ARD_OUT_FC_ESCOTILLA_ABIERTA, HIGH);
+    digitalWrite(ARD_OUT_FC_ESCOTILLA_CERRADA, LOW);
   }
 
   //Escotilla cerrado
   if(digitalRead(PLC_OUT_ESCOTILLA_E_VALVULA) == LOW){
     delay(200);
-    digitalWrite(ARD_OUT_FC_ESCOTILLA_ABIERTA, HIGH);
-    digitalWrite(ARD_OUT_FC_ESCOTILLA_CERRADA, LOW);
+    digitalWrite(ARD_OUT_FC_ESCOTILLA_ABIERTA, LOW);
+    digitalWrite(ARD_OUT_FC_ESCOTILLA_CERRADA, HIGH);
   }
 
 
@@ -140,14 +145,42 @@ void loop() {
   if (pwmValor > 255) pwmValor = 255;
   analogWrite(PWM_PRESION, pwmValor);
 
-  // --- Giros del tambor (1 vuelta cada 3 segundos) ---
-  if (digitalRead(PLC_OUT_GIRO_HOR) == HIGH || digitalRead(PLC_OUT_GIRO_ANTIHOR) == HIGH) {
 
-    delay(3000); // cada 3 segundos = 1 vuelta
-    digitalWrite(ARD_OUT_FC_TAMBOR, HIGH);
-    delay(100);
-    digitalWrite(ARD_OUT_FC_TAMBOR, LOW);
+
+
+
+  // --- Giros del tambor (1 vuelta cada 3 segundos) ---
+  if ((digitalRead(PLC_OUT_GIRO_HOR) == HIGH ) and (cont=!359)){
+  cont++;
+  delay(100);    
+
   }
+  
+ if ((digitalRead(PLC_OUT_GIRO_ANTIHOR) == HIGH) and (cont!=0)){
+  cont--;
+  delay(100);
+
+  }
+  if ((digitalRead(PLC_OUT_GIRO_HOR) == HIGH ) and (cont==359)) {
+
+    cont=0;
+    delay(100);    
+  }
+  if ((digitalRead(PLC_OUT_GIRO_ANTIHOR) == HIGH) and (cont==0)){
+    cont=359;
+    delay(100);
+  }
+
+  if (cont==0)
+    ARD_OUT_FC_TAMBOR_ARRIBA=1;
+  else
+    ARD_OUT_FC_TAMBOR_ARRIBA=0;
+
+  if(cont==180)
+    ARD_OUT_FC_TAMBOR_ABAJO=1;
+  else
+    ARD_OUT_FC_TAMBOR_ABAJO=0;
+
 
   
   // --- DEBUG ---
